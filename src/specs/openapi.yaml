@@ -1,0 +1,1271 @@
+openapi: 3.0.3
+info:
+  title: Innovation Lab web API
+  description: API specification/contract for frontend-backend integration
+  version: 1.0.0
+servers:
+  - url: /api/v1
+    description: Local development mock server
+
+paths:
+  /api/v1/banners:
+    post:
+      summary: Upload a new banner.
+      tags: [Admin - Banner]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file, type]
+              properties:
+                file:
+                  type: string
+                  format: binary
+                type:
+                  type: string
+                  enum: [image, video]
+                title:
+                  type: string
+                subtitle:
+                  type: string
+                caption:
+                  type: string
+                scheduled_start:
+                  type: string
+                  format: date-time
+                scheduled_end:
+                  type: string
+                  format: date-time
+      responses:
+        "201":
+          description: Banner uploaded successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Banner"
+        "400":
+          description: Invalid upload request!
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden (Admin access required)
+        "500":
+          description: Server error
+    get:
+      summary: List all the banners (with search/filter in query)
+      tags: [Admin - Banner]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: type
+          in: query
+          description: Filter by banner type (image or video)
+          schema:
+            type: string
+            enum: [image, video]
+        - name: scheduled_before
+          in: query
+          description: Return banners scheduled before specified datetime
+          schema:
+            type: string
+            format: date-time
+        - name: scheduled_after
+          in: query
+          description: Return banners scheduled after specified datetime
+          schema:
+            type: string
+            format: date-time
+        - name: created_after
+          in: query
+          description: Return banner created after specified datetime
+          schema:
+            type: string
+            format: date-time
+      responses:
+        "200":
+          description: List of all banners
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Banner"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden (Admin access required)
+        "500":
+          description: Server error
+  /api/v1/banners/{id}/activate:
+    put:
+      summary: Set a specific banner as active immediately.
+      tags: [Admin - Banner]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Banner set as active
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Banner activated successfully
+        "400":
+          description: Invalid request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden (Admin access required)
+        "404":
+          description: Banner not found
+  /api/v1/banners/{id}:
+    patch:
+      summary: Update banner metadata or media file
+      description: Update a banner's caption or replace the file. Creates a new version if file is replaced.
+      tags: [Admin - Banner]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                title:
+                  type: string
+                subtitle:
+                  type: string
+                caption:
+                  type: string
+                scheduled_start:
+                  type: string
+                  format: date-time
+                scheduled_end:
+                  type: string
+                  format: date-time
+      responses:
+        "200":
+          description: Banner updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Banner"
+        "400":
+          description: Invalid update input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden (Admin access required)
+        "404":
+          description: Banner not found
+        "500":
+          description: Server error
+    get:
+      summary: Get banner by ID
+      tags: [Admin - Banner]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Banner by given ID
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Banner"
+        "400":
+          description: Invalid ID
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden (Admin access required)
+        "404":
+          description: Banner not found
+  /api/v1/banners/{id}/schedule:
+    put:
+      summary: Schedule a banner to be active at specific time in the future.
+      tags: [Admin - Banner]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [scheduled_start]
+              properties:
+                scheduled_start:
+                  type: string
+                  format: date-time
+                  description: The time at which banner should become active
+      responses:
+        "200":
+          description: Banner scheduled successfully!
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Banner scheduled successfully
+        "400":
+          description: Invalid scheduling request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden (Admin access required)
+        "404":
+          description: Banner not found
+        "500":
+          description: Server error
+    delete:
+      summary: Cancel a banners scheduled activation
+      tags: [Admin - Banner]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Banner schedule cancelled
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Banner schedule cancelled
+        "400":
+          description: Invalid cancel request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden (Admin access required)
+        "404":
+          description: Banner not found
+        "500":
+          description: Server error
+  /api/v1/hero:
+    get:
+      summary: Get the current active banner
+      tags: [Public - Banner]
+      responses:
+        "200":
+          description: Current active banner.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Banner"
+        "404":
+          description: No active banner found!
+        "500":
+          description: Server error
+  /api/v1/testimonials:
+    post:
+      summary: Add a new testimonial
+      tags: [Admin - Testimonials]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [name, text]
+              properties:
+                name:
+                  type: string
+                text:
+                  type: string
+                designation:
+                  type: string
+                  description: Designation of the testifier
+                  example: Graphics Designer
+                organization:
+                  type: string
+                  description: Organization testifier involved in
+                  example: Abc Tech
+                image:
+                  type: string
+                  format: binary
+                  description: Photo/avatar of the testifier
+      responses:
+        "201":
+          description: New testimonials created!
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Testimonial"
+        "400":
+          description: Bad Request - Invalid input
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden (Admin access required)
+        "500":
+          description: Server error!
+    get:
+      summary: List all testimonials
+      tags: [Public - Testimonials]
+      responses:
+        "200":
+          description: List of testimonials
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Testimonial"
+        "500":
+          description: Server error!
+  /api/v1/testimonials/{id}:
+    patch:
+      summary: Update a existing testimonial
+      tags: [Admin - Testimonials]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                text:
+                  type: string
+                designation:
+                  type: string
+                organization:
+                  type: string
+                image:
+                  type: string
+                  format: binary
+                  description: Photo/avatar of the testifier
+      responses:
+        "200":
+          description: Testimonial updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Testimonial"
+        "400":
+          description: Invalid input
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden (Admin access required)
+        "404":
+          description: Testimonial not found
+        "500":
+          description: Server error
+    delete:
+      summary: Delete a testimonial
+      tags: [Admin - Testimonials]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Testimonial deleted successfully
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden (Admin access required)
+        "404":
+          description: Testimonial not found
+        "500":
+          description: Server error
+  /api/v1/events:
+    post:
+      summary: Create a new event
+      tags: [Admin - Events]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [title, description, start_time, end_time]
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                start_time:
+                  type: string
+                  format: date-time
+                end_time:
+                  type: string
+                  format: date-time
+                registration_start:
+                  type: string
+                  format: date-time
+                registration_end:
+                  type: string
+                  format: date-time
+                location:
+                  type: string
+                cover_image:
+                  type: string
+                  format: binary
+                parent_event_id:
+                  type: string
+                  nullable: true
+                  description: Parent event ID if this is a sub-event else null
+                series_name:
+                  type: string
+                  nullable: true
+                  description: For recurring event (Eg. for event IIC Quest1, IIC Quest2,.... series name IIC Quest, for code clash 1, code clash 2,.... series name code clash,... and so on)
+                is_team_event:
+                  type: boolean
+                  nullable: true
+                  default: false
+                  description: Wheather the event requires team registration
+                max_team_members:
+                  type: integer
+                  nullable: true
+                  description: Maximum allowed number of member in a particular team in team based event
+      responses:
+        "201":
+          description: Event created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Event"
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden (Admin access required)
+        "500":
+          description: Server error
+    get:
+      summary: List all the events
+      tags: [Public - Events]
+      parameters:
+        - name: type
+          in: query
+          description: Filter by event type (upcoming, past and ongoing) (Backend dev can filter using date, upcoming->event_start date > current date, ongoing->event_start date <= current date <=event_end date and past -> event_end date < current date)
+          schema:
+            type: string
+            enum: [upcoming, ongoing, past]
+        - name: parent_event_id
+          in: query
+          description: Filter events by parent event ID (null for main/parent event)
+          schema:
+            type: string
+            nullable: true
+        - name: series_name
+          in: query
+          description: Filter events by recurring series name (e.g., "IICQuest")
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+        - name: sort_by
+          in: query
+          schema:
+            type: string
+            description: Field to sort by (start_time, title, created_at)
+        - name: sort_order
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
+      responses:
+        "200":
+          description: List of events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Event"
+        "500":
+          description: Server error
+  /api/v1/events/{id}:
+    patch:
+      summary: Update an existing event
+      description: Admin-only endpoint to update a main event or sub-event. Supports file upload, schedule changes, registration limits and so on
+      tags: [Admin - Events]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the event to update
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                start_time:
+                  type: string
+                  format: date-time
+                end_time:
+                  type: string
+                  format: date-time
+                location:
+                  type: string
+                cover_image:
+                  type: string
+                  format: binary
+                  description: New event image (optional)
+                parent_event_id:
+                  type: string
+                  nullable: true
+                  description: Id of the parent event of this sub-event
+                series_name:
+                  type: string
+                  nullable: true
+                  description: Name of the series this event is part of (e.g., IICQuest)
+                is_team_event:
+                  type: boolean
+                  description: Whether the event is a team-based registration
+                max_team_members:
+                  type: integer
+                  description: Max number of members allowed in a team (if is_team_event is true)
+                registration_start:
+                  type: string
+                  format: date-time
+                  nullable: true
+                  description: When registration opens
+                registration_end:
+                  type: string
+                  format: date-time
+                  nullable: true
+                  description: When registration closes
+      responses:
+        "200":
+          description: Event updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Event"
+        "400":
+          description: Invalid input or validation error
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden (admin access required)
+        "404":
+          description: Event not found
+        "500":
+          description: Server error
+  /api/v1/events/{id}/register:
+    post:
+      summary: Register for an event (solor or team)
+      tags: [Public - Events]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              oneOf:
+                - required: [name, email]
+                  properties:
+                    name:
+                      type: string
+                      description: For solo, participant's name
+                    email:
+                      type: string
+                      format: email
+                      description: For solo, participant's email
+                    phone:
+                      type: string
+                      description: Optional phone number
+                      nullable: true
+                - required: [name, email, team_members]
+                  properties:
+                    name:
+                      type: string
+                      description: Team name
+                    email:
+                      type: string
+                      format: email
+                      description: Email of person registering the team (Team's contact person email)
+                    phone:
+                      type: string
+                      description: Optional phone number of person registeringt he team (Team's contact person phone)
+                      nullable: true
+                    team_members:
+                      type: array
+                      minItems: 1
+                      description: List of team members (including team leader)
+                      items:
+                        type: object
+                        required: [name, email]
+                        properties:
+                          name:
+                            type: string
+                          email:
+                            type: string
+                            format: email
+                          phone:
+                            type: string
+                            nullable: true
+      responses:
+        "201":
+          description: Registration successful (pending approval)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EventRegistration"
+        "400":
+          description: Bad Request - Invalid registration input
+        "404":
+          description: Event not found
+        "500":
+          description: Server error
+  /api/v1/events/{id}/registrations:
+    get:
+      summary: List all the registrations for an event (solo and team)
+      tags: [Admin - Events]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          description: ID of the event participant is registering on
+          required: true
+          schema:
+            type: string
+        - name: status
+          in: query
+          description: Filter by status (pending, approved, rejected)
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        "200":
+          description: List of registrations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/EventRegistration"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden (Only Admin has access)
+        "500":
+          description: Server error
+  /api/v1/registrations/{registration_id}/status:
+    patch:
+      summary: Update the registration status (approve/reject)
+      tags: [Admin - Events]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: registration_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status:
+                  type: string
+                  enum: [pending, approved, rejected]
+      responses:
+        "200":
+          description: Registration status updated
+        "400":
+          description: Invalid input
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Registration not found
+        "500":
+          description: Server error
+  /api/v1/faqs:
+    get:
+      summary: Get list of FAQs
+      tags: [Public - FAQs]
+      parameters:
+        - name: category
+          in: query
+          description: Filter FAQs by category
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+        - name: sort_by
+          in: query
+          schema:
+            type: string
+            enum: [created_at, question]
+        - name: sort_order
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
+      responses:
+        "200":
+          description: List of FAQs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FAQ"
+    post:
+      summary: Create a new FAQ
+      tags: [Admin - FAQs]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FAQInput"
+      responses:
+        "201":
+          description: FAQ created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FAQ"
+
+  /api/v1/faqs/{id}:
+    patch:
+      summary: Update an FAQ
+      tags: [Admin - FAQs]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FAQInput"
+      responses:
+        "200":
+          description: FAQ updated
+    delete:
+      summary: Delete an FAQ
+      tags: [Admin - FAQs]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: FAQ deleted
+  /api/v1/gallery:
+    get:
+      summary: Get gallery items
+      tags: [Public - Gallery]
+      parameters:
+        - name: type
+          in: query
+          description: Filter by media type (image or video)
+          schema:
+            type: string
+            enum: [image, video]
+        - name: category
+          in: query
+          description: Filter by category
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Gallery items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GalleryItem"
+
+    post:
+      summary: Upload gallery item
+      tags: [Admin - Gallery]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [type, media]
+              properties:
+                type:
+                  type: string
+                  enum: [image, video]
+                media:
+                  type: string
+                  format: binary
+                title:
+                  type: string
+                description:
+                  type: string
+                category:
+                  type: string
+      responses:
+        "201":
+          description: Item uploaded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GalleryItem"
+
+  /api/v1/gallery/{id}:
+    patch:
+      summary: Update a gallery item
+      tags: [Admin - Gallery]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                type:
+                  type: string
+                  enum: [image, video]
+                media:
+                  type: string
+                  format: binary
+                title:
+                  type: string
+                description:
+                  type: string
+                category:
+                  type: string
+      responses:
+        "200":
+          description: Gallery item updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GalleryItem"
+
+    delete:
+      summary: Delete a gallery item
+      tags: [Admin - Gallery]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Item deleted
+  /api/v1/contact:
+    post:
+      summary: Submit contact inquiry
+      tags: [Public - Contact]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required: [name, email, subject, message]
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                phone:
+                  type: string
+                  nullable: true
+                subject:
+                  type: string
+                message:
+                  type: string
+      responses:
+        "201":
+          description: Inquiry submitted
+
+  /api/v1/contact/inquiries:
+    get:
+      summary: View submitted inquiries
+      tags: [Admin - Contact]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of inquiries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ContactInquiry"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Banner:
+      type: object
+      properties:
+        id:
+          type: string
+        url:
+          type: string
+        type:
+          type: string
+          enum: [image, video]
+        title:
+          type: string
+        subtitle:
+          type: string
+        caption:
+          type: string
+        current:
+          type: boolean
+        version:
+          type: integer
+        parent_id:
+          type: string
+          nullable: true
+          default: null
+        created_at:
+          type: string
+          format: date-time
+        scheduled_start:
+          type: string
+          format: date-time
+          nullable: true
+          default: null
+        scheduled_end:
+          type: string
+          format: date-time
+          nullable: true
+          default: null
+    Testimonial:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        text:
+          type: string
+        designation:
+          type: string
+          nullable: true
+        organization:
+          type: string
+          nullable: true
+        image_uri:
+          type: string
+          format: uri
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+    Event:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        start_time:
+          type: string
+          format: date-time
+        end_time:
+          type: string
+          format: date-time
+        location:
+          type: string
+        cover_image_url:
+          type: string
+          format: uri
+        parent_event_id:
+          type: string
+          nullable: true
+        series_name:
+          type: string
+          nullable: true
+        is_team_event:
+          type: string
+          nullable: true
+        max_team_members:
+          type: integer
+          nullable: true
+        registration_start:
+          type: string
+          format: date-time
+          description: Registration start datetime.
+        registration_end:
+          type: string
+          format: date-time
+          description: Registration end datetime
+        created_at:
+          type: string
+          format: date-time
+    EventRegistration:
+      type: object
+      properties:
+        id:
+          type: string
+        event_id:
+          type: string
+        type:
+          type: string
+          enum: [solo, team]
+        name:
+          type: string
+          description: Participant name in case of Solo registration and Team name for team registration
+        email:
+          type: string
+          format: email
+          description: Participant email in case of solo registration and Contact person's email in case of team
+        phone:
+          type: string
+          nullable: true
+          description: Participant phone in case of solo registration and Contact person's phone in case of team
+        team_members:
+          type: array
+          nullable: true
+          description: List of all team members for team registrations
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              email:
+                type: string
+                format: email
+              phone:
+                type: string
+                nullable: true
+        status:
+          type: string
+          enum: [pending, approved, rejected]
+        created_at:
+          type: string
+          format: date-time
+    FAQ:
+      type: object
+      properties:
+        id:
+          type: string
+        question:
+          type: string
+        answer:
+          type: string
+        category:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+    FAQInput:
+      type: object
+      required: [question, answer]
+      properties:
+        question:
+          type: string
+        answer:
+          type: string
+        category:
+          type: string
+    GalleryItem:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum: [image, video]
+        media_url:
+          type: string
+          format: uri
+        title:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+    ContactInquiry:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+          nullable: true
+        subject:
+          type: string
+        message:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Bad Request
+        message:
+          type: string
+          example: Invalid file type or missing required fields
