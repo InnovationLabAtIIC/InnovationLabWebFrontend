@@ -1,14 +1,14 @@
-openapi: 3.0.3
+openapi: 3.0.4
 info:
   title: Innovation Lab web API
   description: API specification/contract for frontend-backend integration
   version: 1.0.0
 servers:
-  - url: /api/v1
+  - url: http://localhost:3000/api/v1
     description: Local development mock server
 
 paths:
-  /api/v1/banners:
+  /banners:
     post:
       summary: Upload a new banner.
       tags: [Admin - Banner]
@@ -100,7 +100,7 @@ paths:
           description: Forbidden (Admin access required)
         "500":
           description: Server error
-  /api/v1/banners/{id}/activate:
+  /banners/{id}/activate:
     put:
       summary: Set a specific banner as active immediately.
       tags: [Admin - Banner]
@@ -131,7 +131,7 @@ paths:
           description: Forbidden (Admin access required)
         "404":
           description: Banner not found
-  /api/v1/banners/{id}:
+  /banners/{id}:
     patch:
       summary: Update banner metadata or media file
       description: Update a banner's caption or replace the file. Creates a new version if file is replaced.
@@ -213,7 +213,7 @@ paths:
           description: Forbidden (Admin access required)
         "404":
           description: Banner not found
-  /api/v1/banners/{id}/schedule:
+  /banners/{id}/schedule:
     put:
       summary: Schedule a banner to be active at specific time in the future.
       tags: [Admin - Banner]
@@ -290,7 +290,7 @@ paths:
           description: Banner not found
         "500":
           description: Server error
-  /api/v1/hero:
+  /hero:
     get:
       summary: Get the current active banner
       tags: [Public - Banner]
@@ -305,7 +305,7 @@ paths:
           description: No active banner found!
         "500":
           description: Server error
-  /api/v1/testimonials:
+  /testimonials:
     post:
       summary: Add a new testimonial
       tags: [Admin - Testimonials]
@@ -364,7 +364,7 @@ paths:
                   $ref: "#/components/schemas/Testimonial"
         "500":
           description: Server error!
-  /api/v1/testimonials/{id}:
+  /testimonials/{id}:
     patch:
       summary: Update a existing testimonial
       tags: [Admin - Testimonials]
@@ -434,7 +434,7 @@ paths:
           description: Testimonial not found
         "500":
           description: Server error
-  /api/v1/events:
+  /events:
     post:
       summary: Create a new event
       tags: [Admin - Events]
@@ -553,7 +553,7 @@ paths:
                   $ref: "#/components/schemas/Event"
         "500":
           description: Server error
-  /api/v1/events/{id}:
+  /events/{id}:
     patch:
       summary: Update an existing event
       description: Admin-only endpoint to update a main event or sub-event. Supports file upload, schedule changes, registration limits and so on
@@ -631,7 +631,7 @@ paths:
           description: Event not found
         "500":
           description: Server error
-  /api/v1/events/{id}/register:
+  /events/{id}/register:
     post:
       summary: Register for an event (solor or team)
       tags: [Public - Events]
@@ -703,7 +703,7 @@ paths:
           description: Event not found
         "500":
           description: Server error
-  /api/v1/events/{id}/registrations:
+  /events/{id}/registrations:
     get:
       summary: List all the registrations for an event (solo and team)
       tags: [Admin - Events]
@@ -746,7 +746,7 @@ paths:
           description: Forbidden (Only Admin has access)
         "500":
           description: Server error
-  /api/v1/registrations/{registration_id}/status:
+  /registrations/{registration_id}/status:
     patch:
       summary: Update the registration status (approve/reject)
       tags: [Admin - Events]
@@ -782,7 +782,7 @@ paths:
           description: Registration not found
         "500":
           description: Server error
-  /api/v1/faqs:
+  /faqs:
     get:
       summary: Get list of FAQs
       tags: [Public - FAQs]
@@ -838,7 +838,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/FAQ"
 
-  /api/v1/faqs/{id}:
+  /faqs/{id}:
     patch:
       summary: Update an FAQ
       tags: [Admin - FAQs]
@@ -873,7 +873,7 @@ paths:
       responses:
         "204":
           description: FAQ deleted
-  /api/v1/gallery:
+  /gallery:
     get:
       summary: Get gallery items
       tags: [Public - Gallery]
@@ -940,7 +940,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/GalleryItem"
 
-  /api/v1/gallery/{id}:
+  /gallery/{id}:
     patch:
       summary: Update a gallery item
       tags: [Admin - Gallery]
@@ -993,7 +993,7 @@ paths:
       responses:
         "204":
           description: Item deleted
-  /api/v1/contact:
+  /contact:
     post:
       summary: Submit contact inquiry
       tags: [Public - Contact]
@@ -1021,7 +1021,7 @@ paths:
         "201":
           description: Inquiry submitted
 
-  /api/v1/contact/inquiries:
+  /contact/inquiries:
     get:
       summary: View submitted inquiries
       tags: [Admin - Contact]
@@ -1045,6 +1045,187 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/ContactInquiry"
+  /about:
+    get:
+      summary: Get basic About information
+      tags: ["Public - About"]
+      responses:
+        "200":
+          description: Basic About content
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/About"
+
+  /about/mission-vision:
+    get:
+      summary: Get mission and vision
+      tags: ["Public - About"]
+      responses:
+        "200":
+          description: Mission and vision content
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MissionVision"
+
+    patch:
+      summary: Update mission and vision
+      tags: ["Admin - About"]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MissionVision"
+      responses:
+        "200":
+          description: Updated successfully
+
+  /about/core-values:
+    get:
+      summary: Get core values
+      tags: ["Public - About"]
+      responses:
+        "200":
+          description: List of core values
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CoreValues"
+  /about/core-values/{id}:
+    patch:
+      summary: Edit a core value
+      tags: ["Admin - About"]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CoreValues"
+      responses:
+        "200":
+          description: Updated
+    delete:
+      summary: Delete a core value
+      tags: ["Admin - About"]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /about/parent-org:
+    get:
+      summary: Get parent organization information
+      tags: ["Public - About"]
+      responses:
+        "200":
+          description: Relationship with parent org
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ParentOrg"
+
+    patch:
+      summary: Update parent organization information
+      tags: ["Admin - About"]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ParentOrg"
+      responses:
+        "200":
+          description: Updated successfully
+
+  /about/journey:
+    get:
+      summary: List all milestones
+      tags: ["Public - About"]
+      responses:
+        "200":
+          description: List of journey milestones
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/JourneyItem"
+
+    post:
+      summary: Add a new milestone
+      tags: ["Admin - About"]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/JourneyItem"
+      responses:
+        "201":
+          description: Created
+
+  /about/journey/{id}:
+    patch:
+      summary: Edit a milestone
+      tags: ["Admin - About"]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/JourneyItem"
+      responses:
+        "200":
+          description: Updated
+
+    delete:
+      summary: Delete a milestone
+      tags: ["Admin - About"]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
 components:
   securitySchemes:
     bearerAuth:
@@ -1260,6 +1441,63 @@ components:
         created_at:
           type: string
           format: date-time
+    About:
+      type: object
+      properties:
+        mission:
+          type: string
+        vision:
+          type: string
+        core_values:
+          type: array
+          items:
+            type: string
+        parent_organization_info:
+          type: string
+        cover_image_url:
+          type: string
+          format: uri
+
+    MissionVision:
+      type: object
+      properties:
+        mission:
+          type: string
+        vision:
+          type: string
+
+    CoreValues:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+
+    ParentOrg:
+      type: object
+      properties:
+        title:
+          type: string
+          example: A powerful academic-industry partnership
+        description:
+          type: string
+          example: The Innovation Lab operates as a specialized hub within the Itahari International College ecosystem, bridging the gap between academic research and real-world application.
+
+    JourneyItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        date:
+          type: string
+          format: date
     Error:
       type: object
       properties:
@@ -1269,3 +1507,4 @@ components:
         message:
           type: string
           example: Invalid file type or missing required fields
+git 
