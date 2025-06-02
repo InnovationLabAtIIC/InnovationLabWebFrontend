@@ -5,6 +5,7 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import { getCoreValues, type CoreValue } from "@/services/api"
 import { Lightbulb, Users, LineChart, Leaf } from "lucide-react"
+import Typography  from "@/components/ui/Typography"
 
 const iconMap: Record<string, React.ReactNode> = {
   Innovation: <Lightbulb className="text-white" size={20} />,
@@ -27,9 +28,13 @@ function ValueCard({ title, description, color }: { title: string; description: 
         <div className={`${color} w-10 h-10 rounded-full flex items-center justify-center`}>
           {iconMap[title] || <Lightbulb className="text-white" size={20} />}
         </div>
-        <h3 className="text-lg font-semibold">{title}</h3>
+        <Typography variant="h5" color="primary">
+          {title}
+        </Typography>
       </div>
-      <p className="text-sm text-gray-600">{description}</p>
+      <Typography variant="body2" color="secondary">
+        {description}
+      </Typography>
     </div>
   )
 }
@@ -112,9 +117,14 @@ export default function CoreValues() {
   return (
     <div className="mt-16">
       <div className="flex flex-col md:flex-row">
+        
         <div className="bg-blue-500 text-white p-8 md:w-1/2 flex flex-col justify-center">
-          <h2 className="text-3xl font-bold mb-2">Our Core Values</h2>
-          <p className="text-blue-100">The principles that guide our work and shape our community.</p>
+          <Typography variant="h2" color="white" animated>
+            Our Core Values
+          </Typography>
+          <Typography variant="body1" color="white" className="text-blue-100 mt-2">
+            The principles that guide our work and shape our community.
+          </Typography>
         </div>
 
         <div className="md:w-1/2 p-8">

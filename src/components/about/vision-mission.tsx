@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { Lightbulb, Target } from "lucide-react"
 import { getMissionVision, type MissionVision } from "@/services/api"
+import Typography from "@/components/ui/Typography"
 
 export default function VisionMission() {
   const [data, setData] = useState<MissionVision | null>(null)
@@ -53,52 +54,72 @@ export default function VisionMission() {
             <div className="bg-green-100 w-8 h-8 rounded-full flex items-center justify-center text-green-600">
               <Target size={18} />
             </div>
-            <h2 className="text-xl font-bold">Our Vision</h2>
+            <Typography variant="h4" color="primary">
+              Our Vision
+            </Typography>
           </div>
 
-          <p className="mb-4 text-gray-700">{displayData.vision}</p>
+          <Typography variant="body1" color="secondary" className="mb-4">
+            {displayData.vision}
+          </Typography>
 
-          <ul className="space-y-2 text-sm">
+          <ul className="space-y-2">
             <li className="flex items-start">
               <span className="mr-2">•</span>
-              <span>Create a self-sustaining ecosystem of innovation and entrepreneurship.</span>
+              <Typography variant="body2" color="secondary">
+                Create a self-sustaining ecosystem of innovation and entrepreneurship.
+              </Typography>
             </li>
             <li className="flex items-start">
               <span className="mr-2">•</span>
-              <span>Position our region as a leading innovation hub in Asia</span>
+              <Typography variant="body2" color="secondary">
+                Position our region as a leading innovation hub in Asia
+              </Typography>
             </li>
             <li className="flex items-start">
               <span className="mr-2">•</span>
-              <span>Develop solutions that contribute to the UN Sustainable Development Goals.</span>
+              <Typography variant="body2" color="secondary">
+                Develop solutions that contribute to the UN Sustainable Development Goals.
+              </Typography>
             </li>
           </ul>
         </div>
       </div>
 
       {/* Mission Section */}
-      <div className="border-y-8 border-y-blue-500 rounded-t-lg rounded-b-lg    ">
+      <div className="border-y-8 border-y-blue-500 rounded-t-lg rounded-b-lg">
         <div className="p-6">
           <div className="flex items-center gap-3 mb-4">
             <div className="bg-blue-100 w-8 h-8 rounded-full flex items-center justify-center text-blue-600">
               <Lightbulb size={18} />
             </div>
-            <h2 className="text-xl font-bold">Our Mission</h2>
+            <Typography variant="h4" color="primary">
+              Our Mission
+            </Typography>
           </div>
 
-          <p className="mb-4 text-gray-700">{displayData.mission}</p>
+          <Typography variant="body1" color="secondary" className="mb-4">
+            {displayData.mission}
+          </Typography>
 
-          <ul className="space-y-2 text-sm">
+          <ul className="space-y-2">
             <li className="flex items-start">
               <span className="mr-2">•</span>
-              <span>Foster innovation through multidisciplinary collaboration.</span>
+              <Typography variant="body2" color="secondary">
+                Foster innovation through multidisciplinary collaboration.
+              </Typography>
             </li>
             <li className="flex items-start">
               <span className="mr-2">•</span>
-              <span>Accelerate the development and adoption of breakthrough technologies</span>
+              <Typography variant="body2" color="secondary">
+                Accelerate the development and adoption of breakthrough technologies
+              </Typography>
             </li>
             <li className="flex items-start">
               <span className="mr-2">•</span>
-              <span>Bridge the gap between academic research and industry implementation</span>
+              <Typography variant="body2" color="secondary">
+                Bridge the gap between academic research and industry implementation
+              </Typography>
             </li>
           </ul>
         </div>
