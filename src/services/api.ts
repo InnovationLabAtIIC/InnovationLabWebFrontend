@@ -1,28 +1,42 @@
 // API service for fetching data from the backend
 
-// FAQ Types
+// Updated FAQ Types to match backend
 export type FAQ = {
-    id: string
-    question: string
-    answer: string
-    category: string
-    created_at: string
-  }
-  
-  export async function getFAQs(): Promise<FAQ[]> {
-    try {
-      const response = await fetch("/api/v1/faqs")
-  
-      if (!response.ok) {
-        throw new Error("Failed to fetch FAQs")
-      }
-  
-      return await response.json()
-    } catch (error) {
-      console.error("Error fetching FAQs:", error)
-      return []
+  id: string
+  question: string
+  answer: string
+  createdAt: string
+  lastUpdatedAt: string
+  categoryId: string
+  categoryName: string
+}
+
+export type FAQResponse = {
+  page: number
+  limit: number
+  totalItems: number
+  data: FAQ[]
+}
+
+export async function getFAQs(page = 0, limit = 10): Promise<FAQResponse> {
+  try {
+    const response = await fetch(`https://innovationlabwebbackend.onrender.com/api/v1/faqs?page=${page}&limit=${limit}`)
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch FAQs")
+    }
+
+    return await response.json()
+  } catch (error) {
+    console.error("Error fetching FAQs:", error)
+    return {
+      page: 0,
+      limit: 0,
+      totalItems: 0,
+      data: [],
     }
   }
+}
   
   // About Page Types
   export type About = {
@@ -56,16 +70,20 @@ export type FAQ = {
     date: string
   }
   
-  // Testimonial Types
-  export type Testimonial = {
-    id: string
-    name: string
-    text: string
-    designation: string
-    organization: string
-    image_uri: string
-    created_at: string
-  }
+  // Updated Testimonial Types
+export type Testimonial = {
+  id: string
+  name: string
+  text: string
+  designation: string
+  organization: string
+  imageUrl: string
+  createdAt: string
+  updatedAt: string
+  isDeleted: boolean
+  deletedAt: string | null
+}
+
   
   // About Page API Functions
   export async function getAbout(): Promise<About> {
