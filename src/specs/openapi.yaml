@@ -1507,4 +1507,3 @@ components:
         message:
           type: string
           example: Invalid file type or missing required fields
-git 

@@ -129,9 +129,10 @@ const Typography: React.FC<TypographyProps> = ({
   };
 
   // Combine all classes
+  const hasTextBlack = className.includes('text-black');
   const classes = [
     variantClassMap[variant] || variantClassMap.body1,
-    colorClassMap[color] || colorClassMap.primary,
+    !hasTextBlack ? colorClassMap[color] || colorClassMap.primary : '',
     // Don't override font weight for headings unless explicitly specified
     variant.startsWith('h') && weight === 'normal' ? '' : weightClassMap[weight] || '',
     alignClassMap[align] || alignClassMap.left,
